@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Design とは？ — わかりやすく解説</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: oklch(12% 0.01 250);
+    --bg2: oklch(16% 0.012 250);
+    --bg3: oklch(20% 0.015 250);
+    --fg: oklch(94% 0.005 250);
+    --fg2: oklch(70% 0.01 250);
+    --accent: oklch(75% 0.18 32);
+    --accent2: oklch(72% 0.16 200);
+    --accent3: oklch(78% 0.14 280);
+    --border: oklch(28% 0.015 250);
+    --card: oklch(17% 0.012 250);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .en { font-family: 'Space Grotesk', 'Noto Sans JP', sans-serif; }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: oklch(12% 0.01 250 / 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px; font-weight: 700;
+    color: var(--fg);
+    display: flex; align-items: center; gap: 10px;
+    letter-spacing: -0.02em;
+  }
+  .nav-logo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .nav-badge {
+    font-size: 11px; font-weight: 500;
+    color: var(--accent);
+    background: oklch(75% 0.18 32 / 0.12);
+    border: 1px solid oklch(75% 0.18 32 / 0.3);
+    padding: 3px 10px; border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 900px; border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      oklch(75% 0.18 32 / 0.08) 0%,
+      oklch(72% 0.16 200 / 0.05) 40%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.1em;
+    color: var(--accent);
+    background: oklch(75% 0.18 32 / 0.1);
+    border: 1px solid oklch(75% 0.18 32 / 0.25);
+    padding: 6px 16px; border-radius: 100px;
+    margin-bottom: 32px;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(42px, 7vw, 96px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    color: var(--fg);
+  }
+  .hero h1 .accent-word {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 22px);
+    color: var(--fg2);
+    max-width: 640px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+  .hero-cta-row {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent);
+    color: oklch(12% 0.01 250);
+    padding: 14px 28px; border-radius: 8px;
+    font-weight: 700; font-size: 15px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px oklch(75% 0.18 32 / 0.4); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent;
+    color: var(--fg);
+    padding: 14px 28px; border-radius: 8px;
+    font-weight: 500; font-size: 15px;
+    text-decoration: none; border: 1px solid var(--border); cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .btn-ghost:hover { border-color: var(--fg2); background: var(--bg3); }
+
+  /* ── FLOATING PREVIEW CARDS ── */
+  .hero-preview {
+    margin-top: 80px;
+    position: relative;
+    width: min(900px, 100%);
+  }
+  .preview-window {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px oklch(0% 0 0 / 0.5);
+  }
+  .preview-toolbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .preview-dot.r { background: #FF5F57; }
+  .preview-dot.y { background: #FEBC2E; }
+  .preview-dot.g { background: #28C840; }
+  .preview-title {
+    flex: 1; text-align: center;
+    font-size: 12px; color: var(--fg2);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .preview-body {
+    display: grid; grid-template-columns: 280px 1fr;
+    height: 400px;
+  }
+  .preview-chat {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+    overflow: hidden;
+  }
+  .chat-msg {
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .chat-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .chat-avatar.user { background: var(--accent); color: #1a1a1a; }
+  .chat-avatar.claude { background: oklch(72% 0.16 200 / 0.3); color: var(--accent2); border: 1px solid oklch(72% 0.16 200 / 0.3); }
+  .chat-bubble {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 14px;
+    font-size: 12px; line-height: 1.6; color: var(--fg);
+    max-width: 200px;
+  }
+  .chat-bubble.claude-bubble {
+    background: oklch(72% 0.16 200 / 0.08);
+    border-color: oklch(72% 0.16 200 / 0.2);
+  }
+  .preview-canvas {
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .canvas-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+    flex: 1;
+  }
+  .canvas-card-title {
+    font-size: 11px; font-weight: 600; color: var(--fg2);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+  }
+  .canvas-bar {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    margin-bottom: 6px;
+  }
+  .canvas-bar.w-full { width: 100%; }
+  .canvas-bar.w-75 { width: 75%; }
+  .canvas-bar.w-50 { width: 50%; }
+  .canvas-bar.w-60 { width: 60%; opacity: 0.6; }
+  .canvas-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .canvas-mini-item {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px;
+    font-size: 10px; color: var(--fg2);
+  }
+  .canvas-mini-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    margin-bottom: 6px;
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 100px 24px; }
+  .container { max-width: 1160px; margin: 0 auto; }
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 700; letter-spacing: -0.025em; line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .section-desc {
+    font-size: 17px; color: var(--fg2); line-height: 1.8;
+    max-width: 600px; font-weight: 300;
+  }
+
+  /* ── WHAT IS IT ── */
+  .what-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; align-items: center;
+    margin-top: 64px;
+  }
+  .what-visual {
+    position: relative;
+  }
+  .what-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    position: relative; overflow: hidden;
+  }
+  .what-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .step-flow {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .step-item {
+    display: flex; gap: 16px; align-items: flex-start;
+    position: relative;
+  }
+  .step-item:not(:last-child)::after {
+    content: '';
+    position: absolute; left: 19px; top: 40px;
+    width: 2px; height: calc(100% - 8px);
+    background: linear-gradient(to bottom, var(--border), transparent);
+  }
+  .step-num {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--bg3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    position: relative; z-index: 1;
+  }
+  .step-content { padding: 8px 0 32px; }
+  .step-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .step-content p { font-size: 13px; color: var(--fg2); line-height: 1.6; }
+
+  /* ── FEATURES GRID ── */
+  .features-section { background: var(--bg2); }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 64px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    transition: transform 0.25s, border-color 0.25s;
+    position: relative; overflow: hidden;
+    cursor: default;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    border-color: oklch(75% 0.18 32 / 0.4);
+  }
+  .feature-card::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: 16px;
+    background: radial-gradient(ellipse at 30% 0%, oklch(75% 0.18 32 / 0.06) 0%, transparent 60%);
+    pointer-events: none;
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .feature-card:hover::after { opacity: 1; }
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 16px;
+  }
+  .feature-card h3 {
+    font-size: 17px; font-weight: 600; margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .feature-card p {
+    font-size: 13px; color: var(--fg2); line-height: 1.7;
+  }
+  .feat-icon-a { background: oklch(75% 0.18 32 / 0.15); }
+  .feat-icon-b { background: oklch(72% 0.16 200 / 0.15); }
+  .feat-icon-c { background: oklch(78% 0.14 280 / 0.15); }
+
+  /* ── USECASES ── */
+  .usecases-tabs {
+    margin-top: 56px;
+  }
+  .tab-nav {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .tab-btn {
+    padding: 9px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--fg2);
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .tab-btn.active, .tab-btn:hover {
+    background: var(--accent);
+    color: oklch(12% 0.01 250);
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .usecase-info h3 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
+  .usecase-info p { font-size: 15px; color: var(--fg2); line-height: 1.8; margin-bottom: 24px; }
+  .usecase-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 12px; font-weight: 500;
+    padding: 4px 12px; border-radius: 20px;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--fg2);
+  }
+  .usecase-mockup {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    min-height: 280px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .mockup-header {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .mockup-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .mockup-title { font-size: 14px; font-weight: 600; }
+  .mockup-row {
+    display: flex; gap: 10px; align-items: center;
+  }
+  .mockup-line {
+    height: 10px; border-radius: 5px;
+    background: var(--bg3); border: 1px solid var(--border);
+  }
+  .mockup-block {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px;
+    font-size: 12px; color: var(--fg2);
+  }
+  .accent-line { background: linear-gradient(90deg, var(--accent), var(--accent2)) !important; border: none !important; }
+  .accent2-line { background: linear-gradient(90deg, var(--accent2), var(--accent3)) !important; border: none !important; }
+
+  /* ── DETAIL FEATURES ── */
+  .detail-list {
+    margin-top: 64px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .detail-item {
+    display: grid; grid-template-columns: 280px 1fr;
+    gap: 32px; align-items: start;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-item:first-child { border-top: 1px solid var(--border); }
+  .detail-label {
+    font-size: 14px; font-weight: 600; color: var(--fg);
+    display: flex; align-items: center; gap: 10px;
+    padding-top: 2px;
+  }
+  .detail-label-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+  .detail-text {
+    font-size: 14px; color: var(--fg2); line-height: 1.8;
+  }
+  .detail-chip {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+    background: oklch(75% 0.18 32 / 0.12);
+    color: var(--accent); border: 1px solid oklch(75% 0.18 32 / 0.3);
+    margin-left: 6px; vertical-align: middle;
+  }
+
+  /* ── COMPARE ── */
+  .compare-section { background: var(--bg2); }
+  .compare-table {
+    margin-top: 64px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+  }
+  .compare-head {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-cell {
+    padding: 16px 20px;
+    font-size: 13px; font-weight: 600;
+    border-right: 1px solid var(--border);
+  }
+  .compare-cell:last-child { border-right: none; }
+  .compare-cell.highlight { color: var(--accent); }
+  .compare-row {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row:hover { background: var(--bg3); }
+  .compare-row .compare-cell { font-weight: 400; color: var(--fg2); }
+  .compare-row .compare-cell:first-child { color: var(--fg); font-weight: 500; }
+  .check { color: #34D399; font-size: 16px; }
+  .partial { color: var(--accent); font-size: 14px; }
+  .cross { color: oklch(60% 0.15 20); font-size: 16px; }
+
+  /* ── PRICING ── */
+  .pricing-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px; margin-top: 64px;
+  }
+  .pricing-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    position: relative; overflow: hidden;
+    transition: transform 0.25s;
+  }
+  .pricing-card:hover { transform: translateY(-4px); }
+  .pricing-card.featured {
+    border-color: oklch(75% 0.18 32 / 0.5);
+    background: oklch(17% 0.015 32);
+  }
+  .pricing-card.featured::before {
+    content: 'おすすめ';
+    position: absolute; top: 16px; right: 16px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+    color: oklch(12% 0.01 250);
+    background: var(--accent);
+    padding: 3px 10px; border-radius: 20px;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .pricing-plan { font-size: 13px; font-weight: 600; color: var(--fg2); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Space Grotesk', sans-serif; }
+  .pricing-price { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; font-family: 'Space Grotesk', sans-serif; }
+  .pricing-period { font-size: 13px; color: var(--fg2); margin-bottom: 24px; }
+  .pricing-features { display: flex; flex-direction: column; gap: 10px; }
+  .pricing-feature {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--fg2);
+  }
+  .pricing-feature .check { font-size: 14px; }
+
+  /* ── FAQ ── */
+  .faq-list { margin-top: 56px; display: flex; flex-direction: column; gap: 2px; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+  }
+  .faq-item:first-child { border-top: 1px solid var(--border); }
+  .faq-q {
+    padding: 22px 0; display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; gap: 20px;
+    font-size: 15px; font-weight: 500;
+    list-style: none;
+    transition: color 0.2s;
+  }
+  .faq-q:hover { color: var(--accent); }
+  .faq-arrow { font-size: 18px; color: var(--fg2); transition: transform 0.3s; flex-shrink: 0; }
+  .faq-item.open .faq-arrow { transform: rotate(45deg); }
+  .faq-a {
+    font-size: 14px; color: var(--fg2); line-height: 1.8;
+    max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding-bottom: 20px; }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center;
+    padding: 120px 24px;
+    position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, oklch(75% 0.18 32 / 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-section h2 {
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 700; letter-spacing: -0.03em; line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .cta-section p {
+    font-size: 18px; color: var(--fg2);
+    margin-bottom: 40px; max-width: 520px; margin-left: auto; margin-right: auto;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 40px 24px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; gap: 32px;
+    flex-wrap: wrap;
+  }
+  footer a { color: var(--fg2); text-decoration: none; font-size: 13px; }
+  footer a:hover { color: var(--fg); }
+  .footer-note { font-size: 12px; color: oklch(45% 0.01 250); text-align: center; margin-top: 8px; width: 100%; }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .reveal {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* Typewriter for hero */
+  .typewriter-wrap { display: inline-block; position: relative; }
+  .typewriter-cursor {
+    display: inline-block; width: 3px; height: 1em;
+    background: var(--accent); margin-left: 2px; vertical-align: middle;
+    animation: blink 0.9s step-end infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  @media (max-width: 900px) {
+    .what-grid, .features-grid { grid-template-columns: 1fr; }
+    .tab-content.active { grid-template-columns: 1fr; }
+    .pricing-cards { grid-template-columns: 1fr; }
+    .compare-head, .compare-row { grid-template-columns: 1.5fr 1fr 1fr; }
+    .compare-cell:nth-child(4), .compare-row .compare-cell:nth-child(4) { display: none; }
+    .detail-item { grid-template-columns: 1fr; gap: 8px; }
+    nav { padding: 16px 20px; }
+    .preview-body { grid-template-columns: 1fr; }
+    .preview-chat { height: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    Claude Design 解説
+  </div>
+  <div class="nav-badge">Research Preview</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">Anthropic Labs — 2026年4月17日 発表</div>
+  <h1>
+    AIに話しかけるだけで<br>
+    <span class="accent-word">デザインが完成する</span>
+  </h1>
+  <p class="hero-sub">
+    Claude Design は、Anthropic が開発したAIデザインツールです。<br>
+    デザインの知識もコードの知識も、一切いりません。
+  </p>
+  <div class="hero-cta-row">
+    <a href="#what" class="btn-primary">どんなツール？ →</a>
+    <a href="#usecases" class="btn-ghost">使用事例を見る</a>
+  </div>
+
+  <div class="hero-preview reveal">
+    <div class="preview-window">
+      <div class="preview-toolbar">
+        <div class="preview-dot r"></div>
+        <div class="preview-dot y"></div>
+        <div class="preview-dot g"></div>
+        <div class="preview-title">Claude Design — プロジェクト: モバイルアプリ</div>
+      </div>
+      <div class="preview-body">
+        <div class="preview-chat">
+          <div class="chat-msg">
+            <div class="chat-avatar user">あ</div>
+            <div class="chat-bubble">瞑想アプリのホーム画面を作って。落ち着いた青系のカラーで。</div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar claude">C</div>
+            <div class="chat-bubble claude-bubble">落ち着いたミストブルーをベースに、毎日の瞑想記録とタイマーが見えるホーム画面を生成しました。</div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar user">あ</div>
+            <div class="chat-bubble">ボタンをもう少し大きくして、フォントを細くしたい</div>
+          </div>
+          <div class="chat-msg">
+            <div class="chat-avatar claude">C</div>
+            <div class="chat-bubble claude-bubble">修正しました。タップボタンを44pxに拡大、見出しをLight weightに変更しました。</div>
+          </div>
+        </div>
+        <div class="preview-canvas">
+          <div class="canvas-card">
+            <div class="canvas-card-title">生成されたデザイン — ホーム画面</div>
+            <div class="canvas-bar w-full accent-line" style="height:6px; margin-bottom:12px;"></div>
+            <div class="canvas-mini-grid">
+              <div class="canvas-mini-item">
+                <div class="canvas-mini-dot" style="background: linear-gradient(135deg, #4FA3D1, #6EC6D6);"></div>
+                <div style="font-size:9px; color:var(--fg); font-weight:600;">今日の瞑想</div>
+                <div style="font-size:8px;">12分 完了</div>
+              </div>
+              <div class="canvas-mini-item">
+                <div class="canvas-mini-dot" style="background: linear-gradient(135deg, var(--accent), #F0956B);"></div>
+                <div style="font-size:9px; color:var(--fg); font-weight:600;">連続記録</div>
+                <div style="font-size:8px;">7日間</div>
+              </div>
+              <div class="canvas-mini-item" style="grid-column: span 2;">
+                <div style="font-size:9px; color:var(--fg); font-weight:600; margin-bottom:6px;">今すぐはじめる</div>
+                <div class="canvas-bar w-full accent-line" style="height:24px; border-radius:6px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="canvas-bar w-75 accent2-line" style="height:4px;"></div>
+          <div class="canvas-bar w-50" style="height:4px; opacity: 0.3;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IS IT -->
+<section id="what">
+  <div class="container">
+    <div class="section-label">Claude Design とは</div>
+    <h2 class="section-title">「話す」だけで、プロのデザインが届く</h2>
+    <p class="section-desc">従来のデザインツール（FigmaやAdobe）は専門知識が必要でした。Claude Designは、日本語で話しかけるだけでAIがデザインを生成します。</p>
+
+    <div class="what-grid">
+      <div class="what-visual reveal">
+        <div class="what-card">
+          <div class="step-flow">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h4>チャットで指示する</h4>
+                <p>「営業向けのピッチデックを作って」「モバイルアプリのオンボーディング画面が欲しい」と入力するだけ。</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h4>AIがデザインを生成</h4>
+                <p>Claude Opus 4.7（Anthropic最高性能モデル）が、数秒〜数十秒でデザインを作成します。</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <h4>会話しながら修正</h4>
+                <p>「色をもっとシックに」「このボタンを大きく」と話しかければ、AIが即座に直します。</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <h4>エクスポート・共有</h4>
+                <p>PPTX・PDF・Canvaなどへエクスポート。リンクでチームと共有もできます。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-2">
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px;">
+            <div style="font-size:40px; margin-bottom:12px;">💬</div>
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">専門知識ゼロでOK</h3>
+            <p style="font-size:13px; color:var(--fg2); line-height:1.7;">デザインソフトの操作方法も、色彩理論も、フォント選びの知識も不要。日本語で「こんなものが欲しい」と伝えるだけです。</p>
+          </div>
+          <div style="background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px;">
+            <div style="font-size:40px; margin-bottom:12px;">⚡</div>
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">数分で完成する速さ</h3>
+            <p style="font-size:13px; color:var(--fg2); line-height:1.7;">プロのデザイナーが数日かけて作るものを、AIは数分で生成します。試行錯誤のコストが劇的に下がります。</p>
+          </div>
+          <div style="background:oklch(75% 0.18 32 / 0.07); border:1px solid oklch(75% 0.18 32 / 0.3); border-radius:16px; padding:28px;">
+            <div style="font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Anthropic Labs 公式より</div>
+            <p style="font-size:14px; line-height:1.8; color:var(--fg);">「デザイナーが広く探索できる余地を与え、デザインの専門知識を持たない人でも視覚的なアイデアを具体化できる手段になる」</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="features-section">
+  <div class="container">
+    <div class="section-label">主要機能</div>
+    <h2 class="section-title">何ができるのか</h2>
+    <p class="section-desc">テキストを打ち込むだけで、これだけのことが実現します。</p>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon feat-icon-a">🖥️</div>
+        <h3>インタラクティブ<br>プロトタイプ</h3>
+        <p>クリックできる・動くプロトタイプを生成。実際に触って確認できます。デザイナーなしでユーザーテストが可能に。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon feat-icon-b">📊</div>
+        <h3>スライド・<br>ピッチデック</h3>
+        <p>投資家向けや社内プレゼンのスライドを数分で生成。PowerPointやCanvaにエクスポートして細部を編集できます。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon feat-icon-c">📱</div>
+        <h3>モバイルアプリ<br>モックアップ</h3>
+        <p>スマホ画面のワイヤーフレームやモックアップを即座に作成。複数画面のフローも一度に生成できます。</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon feat-icon-a">🌐</div>
+        <h3>ランディングページ<br>・Webサイト</h3>
+        <p>製品紹介ページ、会社サイト、マーケティング素材をプロンプトから生成。コードもそのまま使えます。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon feat-icon-b">🎬</div>
+        <h3>アニメーション<br>動画</h3>
+        <p>動くビジュアルコンテンツも生成可能。SNS向けのショートアニメやプロモーション動画の下地を作れます。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon feat-icon-c">📋</div>
+        <h3>ワンページャー<br>・ドキュメント</h3>
+        <p>サービス概要、提案書、社内資料などのビジュアルドキュメントを、フォーマット含めて整えて生成します。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USECASES -->
+<section id="usecases">
+  <div class="container">
+    <div class="section-label">活用事例</div>
+    <h2 class="section-title">こんな人が使っています</h2>
+    <p class="section-desc">デザイナーでも、エンジニアでも、経営者でも。職種を問わず使われています。</p>
+
+    <div class="usecases-tabs">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="startup">スタートアップ創業者</button>
+        <button class="tab-btn" data-tab="pm">プロダクトマネージャー</button>
+        <button class="tab-btn" data-tab="marketer">マーケター</button>
+        <button class="tab-btn" data-tab="designer">デザイナー</button>
+        <button class="tab-btn" data-tab="engineer">エンジニア</button>
+      </div>
+
+      <div class="tab-content active" data-content="startup">
+        <div class="usecase-info reveal">
+          <h3>ピッチデックを<br>自分で作れる</h3>
+          <p>投資家向けのピッチデックは、通常デザイナーに依頼するか、PowerPointで悪戦苦闘するものでした。Claude Designなら「うちのサービスはXXで、ターゲットはYY。投資家向けのスライドを10枚で」と打ち込むだけで完成します。</p>
+          <p>Brilliant社の事例：「20回以上プロンプトが必要だった複雑なページが、Claude Designでは2回のプロンプトだけで再現できた」</p>
+          <div class="usecase-tags">
+            <span class="tag">ピッチデック</span>
+            <span class="tag">投資家向け資料</span>
+            <span class="tag">会社紹介</span>
+          </div>
+        </div>
+        <div class="usecase-mockup reveal reveal-delay-1">
+          <div class="mockup-header">
+            <div class="mockup-icon" style="background:oklch(75% 0.18 32 / 0.15);">📊</div>
+            <div class="mockup-title">Series A ピッチデック — 12スライド</div>
+          </div>
+          <div class="mockup-block">
+            <div style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:4px;">スライド 1 — 課題</div>
+            <div class="mockup-line w-full accent-line" style="width:100%; height:6px; margin-bottom:8px;"></div>
+            <div class="mockup-line" style="width:80%; height:6px; margin-bottom:4px;"></div>
+            <div class="mockup-line" style="width:60%; height:6px;"></div>
+          </div>
+          <div class="mockup-block">
+            <div style="font-size:11px; font-weight:700; color:var(--accent2); margin-bottom:4px;">スライド 3 — 市場規模</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px;">
+              <div style="background:var(--bg2); border-radius:6px; padding:8px; text-align:center; font-size:10px;">
+                <div style="font-size:16px; font-weight:700; color:var(--accent);">¥2.4兆</div>TAM
+              </div>
+              <div style="background:var(--bg2); border-radius:6px; padding:8px; text-align:center; font-size:10px;">
+                <div style="font-size:16px; font-weight:700; color:var(--accent2);">¥480億</div>SAM
+              </div>
+              <div style="background:var(--bg2); border-radius:6px; padding:8px; text-align:center; font-size:10px;">
+                <div style="font-size:16px; font-weight:700; color:var(--accent3);">¥24億</div>SOM
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" data-content="pm">
+        <div class="usecase-info reveal">
+          <h3>アイデアをすぐに<br>可視化できる</h3>
+          <p>プロダクトマネージャーが新機能のアイデアを持っていても、デザイナーの工数を確保するまで数週間かかることも。Claude Designなら「新機能のワイヤーフレームを作って」と打てば即座に形になります。</p>
+          <p>そのままClaude Codeに引き渡して、エンジニアが実装を開始することも可能です。</p>
+          <div class="usecase-tags">
+            <span class="tag">ワイヤーフレーム</span>
+            <span class="tag">機能設計</span>
+            <span class="tag">ステークホルダー共有</span>
+          </div>
+        </div>
+        <div class="usecase-mockup reveal reveal-delay-1">
+          <div class="mockup-header">
+            <div class="mockup-icon" style="background:oklch(72% 0.16 200 / 0.15);">📱</div>
+            <div class="mockup-title">通知センター — ワイヤーフレーム</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="mockup-block" style="display:flex; align-items:center; gap:10px;">
+              <div style="width:32px; height:32px; border-radius:50%; background:oklch(72% 0.16 200 / 0.2); flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div class="mockup-line" style="width:70%; height:6px; margin-bottom:4px;"></div>
+                <div class="mockup-line" style="width:50%; height:5px; opacity:0.5;"></div>
+              </div>
+              <div style="font-size:10px; color:var(--accent);">NEW</div>
+            </div>
+            <div class="mockup-block" style="display:flex; align-items:center; gap:10px; opacity:0.6;">
+              <div style="width:32px; height:32px; border-radius:50%; background:var(--bg2); flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div class="mockup-line" style="width:60%; height:6px; margin-bottom:4px;"></div>
+                <div class="mockup-line" style="width:40%; height:5px; opacity:0.5;"></div>
+              </div>
+            </div>
+            <div class="mockup-block" style="display:flex; align-items:center; gap:10px; opacity:0.6;">
+              <div style="width:32px; height:32px; border-radius:50%; background:var(--bg2); flex-shrink:0;"></div>
+              <div style="flex:1;">
+                <div class="mockup-line" style="width:75%; height:6px; margin-bottom:4px;"></div>
+                <div class="mockup-line" style="width:45%; height:5px; opacity:0.5;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" data-content="marketer">
+        <div class="usecase-info reveal">
+          <h3>マーケティング素材を<br>量産できる</h3>
+          <p>SNS用バナー、メールヘッダー、LP、ホワイトペーパーのカバーなど、マーケティングに必要なビジュアル素材を一気に作れます。CanvaへのエクスポートでCanvaユーザーとの協業もスムーズ。</p>
+          <div class="usecase-tags">
+            <span class="tag">LP制作</span>
+            <span class="tag">SNSバナー</span>
+            <span class="tag">キャンペーン資料</span>
+          </div>
+        </div>
+        <div class="usecase-mockup reveal reveal-delay-1">
+          <div class="mockup-header">
+            <div class="mockup-icon" style="background:oklch(78% 0.14 280 / 0.15);">🌐</div>
+            <div class="mockup-title">LP — ヒーローセクション</div>
+          </div>
+          <div class="mockup-block" style="background:linear-gradient(135deg, oklch(16% 0.05 250), oklch(18% 0.08 200)); border-radius:10px; padding:20px; text-align:center;">
+            <div class="mockup-line accent-line" style="width:40%; height:6px; margin:0 auto 12px;"></div>
+            <div class="mockup-line" style="width:70%; height:10px; margin:0 auto 8px; background:var(--fg); opacity:0.7; border-radius:5px;"></div>
+            <div class="mockup-line" style="width:55%; height:10px; margin:0 auto 16px; background:var(--fg); opacity:0.5; border-radius:5px;"></div>
+            <div style="display:flex; gap:8px; justify-content:center;">
+              <div class="mockup-line accent-line" style="width:90px; height:30px; border-radius:6px;"></div>
+              <div class="mockup-line" style="width:90px; height:30px; border-radius:6px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" data-content="designer">
+        <div class="usecase-info reveal">
+          <h3>探索の幅が<br>広がる</h3>
+          <p>プロデザイナーが時間の制約で諦めていた「とにかく多くのバリエーションを試す」探索フェーズが、Claude Designで劇的に速くなります。AIに複数方向性を出させて、方向性が決まったら詳細をFigmaで詰める、という新しいワークフローが生まれています。</p>
+          <div class="usecase-tags">
+            <span class="tag">デザイン探索</span>
+            <span class="tag">バリエーション生成</span>
+            <span class="tag">プロトタイプ共有</span>
+          </div>
+        </div>
+        <div class="usecase-mockup reveal reveal-delay-1">
+          <div class="mockup-header">
+            <div class="mockup-icon" style="background:oklch(75% 0.18 32 / 0.15);">🎨</div>
+            <div class="mockup-title">デザイン探索 — 3バリエーション</div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+            <div style="background:oklch(75% 0.18 32 / 0.1); border:1px solid oklch(75% 0.18 32 / 0.3); border-radius:8px; padding:10px; font-size:10px; color:var(--accent); font-weight:600; text-align:center;">Option A<br><span style="color:var(--fg2); font-weight:400;">ミニマル</span></div>
+            <div style="background:oklch(72% 0.16 200 / 0.1); border:1px solid oklch(72% 0.16 200 / 0.3); border-radius:8px; padding:10px; font-size:10px; color:var(--accent2); font-weight:600; text-align:center;">Option B<br><span style="color:var(--fg2); font-weight:400;">ダーク</span></div>
+            <div style="background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:10px; font-size:10px; color:var(--fg2); font-weight:600; text-align:center;">Option C<br><span style="color:var(--fg2); font-weight:400;">カラフル</span></div>
+          </div>
+          <div class="mockup-block" style="font-size:11px; color:var(--fg2);">← チャットで「Option Aをベースに、もっとアクセントカラーを使って」と指示するだけで次のバリエーションを生成</div>
+        </div>
+      </div>
+
+      <div class="tab-content" data-content="engineer">
+        <div class="usecase-info reveal">
+          <h3>デザインから<br>実装まで一気通貫</h3>
+          <p>エンジニアがUIを作るとき、デザインに時間をかけたくない。Claude Designでプロトタイプを作ったら、ワンクリックでClaude Codeに引き渡せます。デザインとコードが一つのパイプラインでつながります。</p>
+          <div class="usecase-tags">
+            <span class="tag">プロトタイプ → コード</span>
+            <span class="tag">Claude Code連携</span>
+            <span class="tag">内部ツール開発</span>
+          </div>
+        </div>
+        <div class="usecase-mockup reveal reveal-delay-1">
+          <div class="mockup-header">
+            <div class="mockup-icon" style="background:oklch(78% 0.14 280 / 0.15);">⚙️</div>
+            <div class="mockup-title">Claude Code へのハンドオフ</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px; align-items:center; padding:10px 0;">
+            <div style="background:oklch(72% 0.16 200 / 0.1); border:1px solid oklch(72% 0.16 200 / 0.3); border-radius:8px; padding:12px 20px; font-size:12px; width:100%; text-align:center; color:var(--accent2); font-weight:600;">Claude Design でプロトタイプ完成</div>
+            <div style="font-size:18px; color:var(--fg2);">↓ ワンクリックでエクスポート</div>
+            <div style="background:oklch(75% 0.18 32 / 0.1); border:1px solid oklch(75% 0.18 32 / 0.3); border-radius:8px; padding:12px 20px; font-size:12px; width:100%; text-align:center; color:var(--accent); font-weight:600;">Claude Code が実装を開始</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETAIL FEATURES -->
+<section id="detail" style="background:var(--bg2);">
+  <div class="container">
+    <div class="section-label">細かい機能一覧</div>
+    <h2 class="section-title">知っておきたい詳細機能</h2>
+    <p class="section-desc">初心者が知っておくと便利な機能を網羅的に紹介します。</p>
+
+    <div class="detail-list">
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>インラインコメント</div>
+        <div class="detail-text">生成されたデザインのキャンバス上で、変えたい部分を直接クリックしてコメントを入れられます。「このボタンの色を変えて」「ここのテキストを短くして」と特定の場所だけ指定した修正が可能。チャットで全体の変更を指示するより、細かな修正に向いています。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>デザインシステム自動構築</div>
+        <div class="detail-text">GitHubのリポジトリや既存のデザインファイルを読み込ませると、Claudeがあなたの会社・チームのデザインシステム（色・フォント・コンポーネント）を自動で学習します<span class="detail-chip">Enterprise向け</span>。以降のすべてのプロジェクトで、ブランドに一貫したデザインが出力されます。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>多様な入力形式</div>
+        <div class="detail-text">テキストプロンプトだけでなく、画像（スクリーンショット・ラフスケッチ・競合製品）、DOCX・PPTX・XLSXのドキュメント、GitHubリポジトリ、Webページのキャプチャなどを入力として受け付けます。「このスクリーンショットに似た感じで作って」という指示が可能です。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>Webキャプチャツール</div>
+        <div class="detail-text">既存のWebサイトの要素をそのままキャプチャして取り込めます。「うちのサイトのヘッダーのデザインを流用しながら、新しいページを作って」という使い方ができ、実際の製品に近いプロトタイプが作れます。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>チーム共有・コラボレーション</div>
+        <div class="detail-text">作ったデザインは、組織内のメンバーとリンクで共有できます。「閲覧のみ」「コメント可」「編集可」の3種類の権限設定があり、非同期でのデザインレビューが可能。チーム全員がClaude Designにアクセスできれば、共同で修正・改善もできます。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>エクスポート形式</div>
+        <div class="detail-text">PPTX（PowerPoint）、PDF、PNG、Canvaへのエクスポートに対応。Claude Codeへの直接ハンドオフもワンクリックで可能で、デザイナーの成果物をエンジニアがすぐにコード実装できます。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>モデル切り替え</div>
+        <div class="detail-text">デフォルトはClaude Opus 4.7（最高品質）ですが、素早い実験にはClaude Haiku 4.5（最速）、バランス型のSonnet 4.6など複数モデルを会話の途中でも切り替えられます。用途に応じてスピードとクオリティをトレードオフできます。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>アクセシビリティレビュー</div>
+        <div class="detail-text">「このデザインのアクセシビリティを確認して」と依頼すると、色のコントラスト比、タップ領域のサイズ、スクリーンリーダー対応などの観点で問題点を指摘してくれます。バリアフリーなデザインの実現をAIがサポートします。</div>
+      </div>
+      <div class="detail-item reveal">
+        <div class="detail-label"><div class="detail-label-dot"></div>利用枠の独立管理</div>
+        <div class="detail-text">Claude Designの利用枠は、通常のClaudeチャットやClaude Codeとは別に計測されます。毎週リセットされる専用枠が付与されるため、日常のAI利用でDesignの上限を消費してしまう心配はありません。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section class="compare-section">
+  <div class="container">
+    <div class="section-label">ツール比較</div>
+    <h2 class="section-title">他のツールとの違い</h2>
+    <p class="section-desc">Claude Designが得意な領域と、既存ツールの強みをシンプルに比較します。</p>
+
+    <div class="compare-table reveal">
+      <div class="compare-head">
+        <div class="compare-cell">機能・特徴</div>
+        <div class="compare-cell highlight">Claude Design</div>
+        <div class="compare-cell">Figma</div>
+        <div class="compare-cell">Canva</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">デザイン知識なしで使える</div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="partial">△</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">チャットで指示して生成</div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="partial">△</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">インタラクティブプロトタイプ</div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">コードへの直接ハンドオフ</div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="partial">△</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">既存コードベースの読み込み</div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">ピクセル精度の細かい編集</div>
+        <div class="compare-cell"><span class="partial">△</span></div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="partial">△</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">スライド・プレゼン作成</div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Canvaへのエクスポート</div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="check">✓</span></div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--fg2); margin-top:16px; text-align:right;">✓ 対応　△ 一部対応・限定的　✗ 非対応（2026年4月時点）</p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">利用方法・料金</div>
+    <h2 class="section-title">どうすれば使えるの？</h2>
+    <p class="section-desc">Claude Designは現在、リサーチプレビューとして提供中です。Claude の有料プランに含まれています。</p>
+
+    <div class="pricing-cards">
+      <div class="pricing-card reveal">
+        <div class="pricing-plan">Pro</div>
+        <div class="pricing-price">$20<span style="font-size:18px;">/月</span></div>
+        <div class="pricing-period">個人向け・基本プラン</div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><span class="check">✓</span> Claude Design 利用可能</div>
+          <div class="pricing-feature"><span class="check">✓</span> Claude Opus 4.7 使用可</div>
+          <div class="pricing-feature"><span class="check">✓</span> 毎週リセットの専用枠</div>
+          <div class="pricing-feature"><span class="check">✓</span> Canvaエクスポート</div>
+        </div>
+      </div>
+      <div class="pricing-card featured reveal reveal-delay-1">
+        <div class="pricing-plan">Max</div>
+        <div class="pricing-price">$100<span style="font-size:18px;">/月〜</span></div>
+        <div class="pricing-period">ヘビーユーザー向け</div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><span class="check">✓</span> Proの全機能</div>
+          <div class="pricing-feature"><span class="check">✓</span> より多くの利用枠</div>
+          <div class="pricing-feature"><span class="check">✓</span> 大規模プロジェクト向け</div>
+          <div class="pricing-feature"><span class="check">✓</span> 優先アクセス</div>
+        </div>
+      </div>
+      <div class="pricing-card reveal reveal-delay-2">
+        <div class="pricing-plan">Team / Enterprise</div>
+        <div class="pricing-price" style="font-size:28px;">要問合せ</div>
+        <div class="pricing-period">チーム・法人向け</div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><span class="check">✓</span> チームでの共有・コラボ</div>
+          <div class="pricing-feature"><span class="check">✓</span> デザインシステム自動構築</div>
+          <div class="pricing-feature"><span class="check">✓</span> 管理者による制御</div>
+          <div class="pricing-feature"><span class="check">✓</span> 専用サポート</div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--fg2); margin-top:24px; text-align:center;">※ Claude Designの利用枠はチャットやClaude Codeとは独立した別枠。現在はリサーチプレビューとして順次展開中。</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="background:var(--bg2);">
+  <div class="container">
+    <div class="section-label">よくある質問</div>
+    <h2 class="section-title">気になること、まとめて解決</h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>デザインの知識がまったくなくても使えますか？</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">はい、使えます。Claude Designはデザインの専門知識を持たない人でも視覚的なアイデアを具体化できる手段になることを明示的に目指して開発されています。「こんな感じのものが欲しい」と日本語で打ち込むだけで動き出します。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>生成されたデザインを後から修正できますか？</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">できます。チャットで「全体的にもっとシンプルに」という大きな修正もできますし、キャンバス上の特定の要素をクリックして「この部分だけ色を変えて」という細かい指示も可能です。また、テキストを直接編集したり、専用のスライダーでスペーシングや色を微調整する機能もあります。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>日本語で指示できますか？</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">Claude自体が高い日本語理解力を持っているため、日本語での指示も有効です。ただし、Claude Designはまだリサーチプレビュー段階であり、一部のUIや機能が英語のみの可能性があります。指示文は日本語でも機能します。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>FigmaやCanvaとどう使い分ければいいですか？</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">Claude Designはアイデアを素早く形にする「探索フェーズ」に最適です。方向性が決まったら、ピクセル精度の細かい仕上げはFigmaで、SNSやマーケティング素材の仕上げはCanvaで、という使い分けが現実的です。Claude DesignからCanvaへの直接エクスポートも可能なので、ワークフローがつながっています。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>今すぐ無料で試せますか？</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">現在はClaude Pro・Max・Team・Enterpriseプランの有料ユーザー向けに順次展開中です（2026年4月時点）。無料プランでは現時点では利用できません。Claude Proは月額$20から利用できます。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>生成物の著作権はどうなりますか？</span>
+          <span class="faq-arrow">+</span>
+        </div>
+        <div class="faq-a">Anthropicの利用規約によれば、ユーザーが生成した出力物の権利はユーザーに帰属します。ただし、AIが生成したコンテンツの著作権に関しては各国の法律・ガイドラインが変化していますので、商用利用の際は最新の情報をご確認ください。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="section-label">はじめてみよう</div>
+    <h2 class="section-title">
+      まずは一度、<br>
+      <span style="background:linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">話しかけてみる</span>
+    </h2>
+    <p>Claude のPro/Maxプランに加入すれば、今日からClaude Designが使えます。デザインの知識は不要です。</p>
+    <div class="hero-cta-row">
+      <a href="https://claude.ai" target="_blank" class="btn-primary">claude.ai を開く →</a>
+      <a href="https://www.anthropic.com/news/claude-design-anthropic-labs" target="_blank" class="btn-ghost">公式発表を読む</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="https://www.anthropic.com" target="_blank">Anthropic 公式</a>
+  <a href="https://claude.ai" target="_blank">Claude.ai</a>
+  <a href="https://support.claude.com/en/articles/14604416-get-started-with-claude-design" target="_blank">ヘルプセンター</a>
+  <div class="footer-note">本ページは公式情報をもとに制作した解説資料です。情報は2026年4月時点のものです。最新情報はAnthropic公式サイトをご確認ください。</div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector(`[data-content="${tab}"]`).classList.add('active');
+  });
+});
+
+// FAQ
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// Typewriter effect on hero
+// (already handled via CSS animations; hero reveal triggered on load)
+window.addEventListener('load', () => {
+  document.querySelectorAll('.reveal').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight) {
+      el.classList.add('visible');
+    }
+  });
+});
+</script>
+</body>
+</html>
